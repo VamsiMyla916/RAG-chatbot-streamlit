@@ -1,13 +1,10 @@
-## Of course. A great `README.md` file is essential for your GitHub repository. It acts as the front page for your project.
-
-````markdown
 # 📄 RAG Chatbot with Local LLM and Streamlit
 
 > An end-to-end RAG (Retrieval-Augmented Generation) chatbot that answers questions about user-uploaded PDF documents. This project runs a powerful, open-source Large Language Model entirely on your local machine, ensuring privacy and eliminating the need for API keys.
 
 ## Demo
 
-!(screenshot.png)
+![Final App Screenshot](https://raw.githubusercontent.com/VamsiMyla916/RAG-chatbot-streamlit/main/screenshot.png)
 
 ## Features
 
@@ -39,6 +36,7 @@ Follow these steps to set up the project locally.
 git clone [https://github.com/YourUsername/YourRepoName.git](https://github.com/YourUsername/YourRepoName.git)
 cd YourRepoName
 ```
+
 ````
 
 _(Action Required:Replace `YourUsername` and `YourRepoName` with your actual GitHub details.)_
@@ -102,3 +100,4 @@ python -m streamlit run app.py
 - Ask questions about your document in the chat input box at the bottom.
 
 ---
+````
