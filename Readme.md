@@ -7,7 +7,7 @@
 
 ## Demo
 
-![Final App Screenshot](final%20output.png)
+![Final App Screenshot](screenshot.png)
 
 ## Features
 
