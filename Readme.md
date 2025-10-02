@@ -7,7 +7,7 @@
 
 ## Demo
 
-![Final output image](https://github.com/VamsiMyla916/RAG-chatbot-streamlit/blob/main/screenshot.png?raw=true)
+![Final App Screenshot](screenshot.png)
 
 ## Features
 
