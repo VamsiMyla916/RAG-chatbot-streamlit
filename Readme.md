@@ -7,7 +7,7 @@
 
 ## Demo
 
-![Final App Screenshot](path/to/your/screenshot.png)
+![Final App Screenshot](C:\Users\mylav\OneDrive\Desktop\rag-chatbot\final output.png)
 _(Action Required: Replace this with a screenshot of your final working application!)_
 
 ---
