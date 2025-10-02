@@ -7,9 +7,9 @@
 
 ## Demo
 
-## ![Final App Screenshot](final%20output.png)
+![Final App Screenshot](final%20output.png)
 
-## ## Features
+## Features
 
 - Interactive Chat Interface: Ask questions about your documents in a user-friendly web UI built with Streamlit.
 - Local & Private: Powered by Google's `gemma-2b-it`, the entire AI pipeline runs locally. Your documents and queries never leave your machine.
@@ -18,7 +18,7 @@
 
 ---
 
-## ## Tech Stack
+## Tech Stack
 
 - Language: Python
 - Core Frameworks: LangChain, Streamlit, Hugging Face Transformers
@@ -29,7 +29,7 @@
 
 ---
 
-## ## Setup and Installation
+## Setup and Installation
 
 Follow these steps to set up the project locally.
 
@@ -82,7 +82,7 @@ huggingface-cli login
 
 ---
 
-## \#\# Usage
+\#\# Usage
 
 1. Run the Streamlit App
 
@@ -102,11 +102,3 @@ python -m streamlit run app.py
 - Ask questions about your document in the chat input box at the bottom.
 
 ---
-
-## \#\# License
-
-This project is licensed under the MIT License. See the `LICENSE` file for details.
-
-```
-
-```
