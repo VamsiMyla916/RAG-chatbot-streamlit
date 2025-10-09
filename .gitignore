@@ -10,3 +10,6 @@ __pycache__/
 
 # VS Code settings
 .vscode/
+
+# Streamlit secrets
+.streamlit/
