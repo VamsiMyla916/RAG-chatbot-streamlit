@@ -47,6 +47,17 @@ def get_rag_chain():
         torch_dtype="auto", 
         trust_remote_code=True
     ).to(device)
+    
+    
+    hf_token = st.secrets["HUGGING_FACE_HUB_TOKEN"]
+
+    tokenizer = AutoTokenizer.from_pretrained(model_id, token=hf_token)
+model = AutoModelForCausalLM.from_pretrained(
+        model_id,
+        torch_dtype="auto", 
+        trust_remote_code=True,
+        token=hf_token
+    ).to(device)
 
     pipe = pipeline(
         "text-generation",
