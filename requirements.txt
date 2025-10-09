@@ -1,6 +1,6 @@
 streamlit
 transformers==4.41.2
-torch==2.3.0
+torch
 sentence-transformers==3.0.1
 faiss-cpu
 pypdf
@@ -9,4 +9,4 @@ langchain
 langchain-core
 langchain-community
 langchain-text-splitters
-numpy==1.26.4
+numpy
