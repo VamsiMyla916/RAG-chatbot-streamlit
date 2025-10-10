@@ -45,7 +45,7 @@ def get_vector_store(chunks):
 
 @st.cache_resource
 def get_rag_chain():
-    model_id = "distilgpt2"
+    model_id = "TinyLlama/TinyLlama-1.1B-Chat-v1.0"
     device = "cuda" if torch.cuda.is_available() else "cpu"
     hf_token = st.secrets.get("HUGGING_FACE_HUB_TOKEN", "")
 
