@@ -4,6 +4,7 @@ from langchain_text_splitters import RecursiveCharacterTextSplitter
 from langchain_community.embeddings import HuggingFaceEmbeddings
 from langchain_community.vectorstores import FAISS
 from langchain.chains import RetrievalQA
+from langchain.prompts import PromptTemplate
 from langchain_community.llms import HuggingFacePipeline
 from transformers import AutoModelForCausalLM, AutoTokenizer, pipeline
 import torch
@@ -19,64 +20,59 @@ st.set_page_config(
 # --- App Title ---
 st.title("📄 Chat with Your Documents")
 
-# --- Sidebar for File Upload ---
+# --- Sidebar for File Upload & Contact Info ---
 with st.sidebar:
     st.header("Upload Your PDF")
     uploaded_file = st.file_uploader("Choose a PDF file", type="pdf")
 
+    st.divider()
+    st.markdown(
+        """
+        
+        **Please provide your valuable feedback or suggestions on how can we further improve this application. We can connect and discuss. Please find my linkedin and Github here:**
+        - [LinkedIn](https://www.linkedin.com/in/vamsimyla/)
+        - [GitHub](https://github.com/VamsiMyla916/RAG-chatbot-streamlit)
+        - [Email:mylavamsikrishnasai@gmail.com](mailto:mylavamsikrishnasai@gmail.com)
+        """
+    )
+
 # --- Functions ---
 
-# Function to create the vector store
 def get_vector_store(chunks):
     embedding_model = HuggingFaceEmbeddings(model_name="sentence-transformers/all-MiniLM-L6-v2")
     vector_store = FAISS.from_documents(documents=chunks, embedding=embedding_model)
     return vector_store
 
-# Function to load the LLM, prepared for deployment
 @st.cache_resource
 def get_rag_chain():
-    model_id = "distilgpt2"
-    
-    # Check for GPU availability
+    model_id = "TinyLlama/TinyLlama-1.1B-Chat-v1.0"
     device = "cuda" if torch.cuda.is_available() else "cpu"
-    
-    # Get the Hugging Face token from Streamlit secrets
-    # This is the secure way to handle secrets in a deployed app
-    hf_token = st.secrets["HUGGING_FACE_HUB_TOKEN"]
+    hf_token = st.secrets.get("HUGGING_FACE_HUB_TOKEN", "")
 
-    # Load the tokenizer and model using the token
     tokenizer = AutoTokenizer.from_pretrained(model_id, token=hf_token)
     model = AutoModelForCausalLM.from_pretrained(
         model_id,
-        torch_dtype="auto", 
         trust_remote_code=True,
         token=hf_token
     ).to(device)
 
-    # Create the text-generation pipeline
     pipe = pipeline(
         "text-generation",
         model=model,
         tokenizer=tokenizer,
-        max_new_tokens=256,
-        temperature=0.1,
+        max_new_tokens=512, # Increased max tokens for more detailed answers
+        temperature=0.2,
     )
     
-    # Wrap the pipeline in a LangChain object
     llm = HuggingFacePipeline(pipeline=pipe)
-    
     return llm
 
 # --- Main App Logic ---
 
-# 1. Process the Uploaded File
 if uploaded_file is not None:
-    # This check ensures the PDF is processed only once per upload
     if "vector_store" not in st.session_state or st.session_state.uploaded_file_name != uploaded_file.name:
         st.session_state.uploaded_file_name = uploaded_file.name
-        
         with st.spinner("Processing PDF..."):
-            # Create a temporary directory to store the file
             temp_dir = "temp_files"
             if not os.path.exists(temp_dir):
                 os.makedirs(temp_dir)
@@ -85,18 +81,15 @@ if uploaded_file is not None:
             with open(temp_file_path, "wb") as f:
                 f.write(uploaded_file.getbuffer())
             
-            # Load and chunk the document
             loader = PyPDFLoader(temp_file_path)
             documents = loader.load()
             
             text_splitter = RecursiveCharacterTextSplitter(chunk_size=1000, chunk_overlap=200)
             chunks = text_splitter.split_documents(documents)
             
-            # Create and save the vector store in the session state
             st.session_state.vector_store = get_vector_store(chunks)
             st.success("PDF processed and knowledge base created!")
 
-    # 2. Initialize and Display Chat History
     if "messages" not in st.session_state:
         st.session_state.messages = []
 
@@ -104,7 +97,6 @@ if uploaded_file is not None:
         with st.chat_message(message["role"]):
             st.markdown(message["content"])
 
-    # 3. Handle User Input and Generate Response
     if prompt := st.chat_input("Ask a question about your document..."):
         st.session_state.messages.append({"role": "user", "content": prompt})
         with st.chat_message("user"):
@@ -112,23 +104,58 @@ if uploaded_file is not None:
 
         with st.chat_message("assistant"):
             with st.spinner("Thinking..."):
-                # Load the cached LLM
                 llm = get_rag_chain()
                 
-                # Create the RAG chain
+                # --- NEW: Professional Prompt Template ---
+                # This uses the official chat template for TinyLlama for better results
+                prompt_template = """
+                <|system|>
+                You are a helpful AI assistant. Use the provided context to answer the user's question.
+                If the answer is a list, format it with markdown bullets.
+                If you don't know the answer, simply state that you don't know.
+                Do not repeat the question or the context in your answer. Provide only the helpful answer itself.
+                Context: {context}</s>
+                <|user|>
+                Question: {question}</s>
+                <|assistant|>
+                Helpful Answer:"""
+                
+                PROMPT = PromptTemplate(
+                    template=prompt_template, input_variables=["context", "question"]
+                )
+                
                 qa_chain = RetrievalQA.from_chain_type(
                     llm=llm,
                     chain_type="stuff",
-                    retriever=st.session_state.vector_store.as_retriever()
+                    retriever=st.session_state.vector_store.as_retriever(),
+                    chain_type_kwargs={"prompt": PROMPT},
+                    return_source_documents=False # We don't need the source docs in the final output
                 )
                 
-                # Get the answer
-                response = qa_chain.run(prompt)
-                st.markdown(response)
-        
-        # Add the assistant's response to the chat history
-        st.session_state.messages.append({"role": "assistant", "content": response})
+                result = qa_chain.invoke({"query": prompt})
+                raw_response = result['result']
+                
+                # --- NEW: More Robust Cleaning Logic ---
+                # This function will clean the text more reliably
+                def clean_response(text):
+                    # First, remove the "Helpful Answer:" prefix if it exists
+                    if "Helpful Answer:" in text:
+                        text = text.split("Helpful Answer:", 1)[1]
+                    
+                    # Then, remove any repeated context or instructions
+                    context_marker = "Use the following pieces of context"
+                    if context_marker in text:
+                        text = text.split(context_marker, 1)[0]
+                        
+                    return text.strip()
 
+                cleaned_response = clean_response(raw_response)
+
+                formatted_response = f"**Question:** {prompt}\n\n**Answer:**\n{cleaned_response}"
+                
+                st.markdown(formatted_response)
+        
+        st.session_state.messages.append({"role": "assistant", "content": formatted_response})
 else:
     st.info("Please upload a PDF file to begin chatting.")
 
