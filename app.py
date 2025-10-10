@@ -35,7 +35,7 @@ def get_vector_store(chunks):
 # Function to load the LLM, prepared for deployment
 @st.cache_resource
 def get_rag_chain():
-    model_id = "google/gemma-2b-it"
+    model_id = "distilgpt2"
     
     # Check for GPU availability
     device = "cuda" if torch.cuda.is_available() else "cpu"
