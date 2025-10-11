@@ -28,9 +28,7 @@ with st.sidebar:
     st.divider()
     st.markdown(
         """
-        Made with ❤️ by **Vamsi Krishna Sai Myla**
-        
-        **Connect & Provide Feedback:**
+        **I would appreciate any valuable feedback and open to discuss any ideas on how to improve this app further. Please find my contact here:**
         - [LinkedIn](https://www.linkedin.com/in/vamsimyla/)
         - [GitHub](https://github.com/VamsiMyla916/RAG-chatbot-streamlit)
         - [Email](mailto:mylavamsikrishnasai@gmail.com)
