@@ -28,7 +28,7 @@ with st.sidebar:
     st.divider()
     st.markdown(
         """
-        **Connect & Provide Feedback:**
+        **Please provide your valuable feedback or suggestions on how can we further improve this application. We can connect and discuss. Please find my linkedin and Github here:**
         - [LinkedIn](https://www.linkedin.com/in/vamsimyla/)
         - [GitHub](https://github.com/VamsiMyla916/RAG-chatbot-streamlit)
         - [Email:mylavamsikrishnasai@gmail.com](mailto:mylavamsikrishnasai@gmail.com)
@@ -46,13 +46,10 @@ def get_vector_store(chunks):
 @st.cache_resource
 def get_llm_pipeline():
     """Initializes and returns the language model pipeline."""
-    # Using a very small model to fit into Streamlit's free hardware
     model_id = "distilgpt2"
     device = "cuda" if torch.cuda.is_available() else "cpu"
-    
-    # .get() is used for graceful error handling if the secret is missing
     hf_token = st.secrets.get("HUGGING_FACE_HUB_TOKEN", "")
-    
+
     tokenizer = AutoTokenizer.from_pretrained(model_id, token=hf_token)
     model = AutoModelForCausalLM.from_pretrained(
         model_id,
@@ -64,8 +61,8 @@ def get_llm_pipeline():
         "text-generation",
         model=model,
         tokenizer=tokenizer,
-        max_new_tokens=256, # Reduced max tokens for the smaller model
-        temperature=0.7,
+        max_new_tokens=512,
+        temperature=0.2,
     )
     
     llm = HuggingFacePipeline(pipeline=pipe)
@@ -78,23 +75,19 @@ if uploaded_file is not None:
     if "vector_store" not in st.session_state or st.session_state.uploaded_file_name != uploaded_file.name:
         st.session_state.uploaded_file_name = uploaded_file.name
         with st.spinner("Processing PDF... This may take a moment."):
-            # Create a temporary directory if it doesn't exist
             temp_dir = "temp_files"
             if not os.path.exists(temp_dir):
                 os.makedirs(temp_dir)
             
-            # Save the uploaded file to the temporary directory
             temp_file_path = os.path.join(temp_dir, uploaded_file.name)
             with open(temp_file_path, "wb") as f:
                 f.write(uploaded_file.getbuffer())
             
-            # Load and split the PDF document
             loader = PyPDFLoader(temp_file_path)
             documents = loader.load()
             text_splitter = RecursiveCharacterTextSplitter(chunk_size=1000, chunk_overlap=200)
             chunks = text_splitter.split_documents(documents)
             
-            # Create and store the vector store in the session state
             st.session_state.vector_store = get_vector_store(chunks)
             st.success("✅ PDF processed and knowledge base created!")
 
@@ -119,40 +112,53 @@ if uploaded_file is not None:
             with st.spinner("🤔 Thinking..."):
                 llm = get_llm_pipeline()
                 
-                # A simpler prompt template suitable for the smaller distilgpt2 model
                 prompt_template = """
-                Use the following context to answer the question. If you don't know the answer, just say you don't know.
-                Context: {context}
-                Question: {question}
-                Answer:"""
+                <|system|>
+                You are a helpful AI assistant. Use the provided context to answer the user's question.
+                If the answer is a list, format it with markdown bullets.
+                If you don't know the answer, simply state that you don't know.
+                Do not repeat the question or the context in your answer. Provide only the helpful answer itself.
+                Context: {context}</s>
+                <|user|>
+                Question: {question}</s>
+                <|assistant|>
+                Helpful Answer:"""
                 
                 PROMPT = PromptTemplate(
                     template=prompt_template, input_variables=["context", "question"]
                 )
                 
-                # Create the RetrievalQA chain
                 qa_chain = RetrievalQA.from_chain_type(
                     llm=llm,
                     chain_type="stuff",
-                    # ✨ FIX: Limit retriever to top 2 results to avoid context overflow
+                    # FIX: Limit retriever to top 2 results to avoid context overflow error
                     retriever=st.session_state.vector_store.as_retriever(search_kwargs={'k': 2}),
                     chain_type_kwargs={"prompt": PROMPT},
                 )
                 
-                # Invoke the chain and get the result
                 result = qa_chain.invoke({"query": prompt})
-                response = result.get('result', "I couldn't find an answer.").strip()
+                raw_response = result['result']
+                
+                # --- NEW: More Robust Cleaning Logic ---
+                def clean_response(text):
+                    # Remove the "Helpful Answer:" prefix and any leading/trailing whitespace
+                    if "Helpful Answer:" in text:
+                        text = text.split("Helpful Answer:", 1)[1]
+                    
+                    # Remove any text that looks like a repeated instruction or context
+                    stop_phrases = ["<|system|>", "<|user|>", "Context:", "Question:"]
+                    for phrase in stop_phrases:
+                        if phrase in text:
+                            text = text.split(phrase, 1)[0]
+                            
+                    return text.strip()
 
-                # Clean the response to prevent the model from repeating the prompt
-                if "Question:" in response:
-                    response = response.split("Question:")[0].strip()
-                if "Answer:" in response:
-                    # Take only the text after the final "Answer:"
-                    response = response.rsplit("Answer:", 1)[-1].strip()
+                cleaned_response = clean_response(raw_response)
 
-                st.markdown(response)
+                # --- MODIFIED: Display only the clean answer ---
+                st.markdown(cleaned_response)
         
-        # Add assistant's response to chat history
-        st.session_state.messages.append({"role": "assistant", "content": response})
+        # --- MODIFIED: Save only the clean answer to history ---
+        st.session_state.messages.append({"role": "assistant", "content": cleaned_response})
 else:
     st.info("👋 Welcome! Please upload a PDF file to begin chatting.")
