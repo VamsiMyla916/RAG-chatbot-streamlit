@@ -28,11 +28,12 @@ with st.sidebar:
     st.divider()
     st.markdown(
         """
+        Made with ❤️ by **Vamsi Krishna Sai Myla**
         
-        **Please provide your valuable feedback or suggestions on how can we further improve this application. We can connect and discuss. Please find my linkedin and Github here:**
+        **Connect & Provide Feedback:**
         - [LinkedIn](https://www.linkedin.com/in/vamsimyla/)
         - [GitHub](https://github.com/VamsiMyla916/RAG-chatbot-streamlit)
-        - [Email:mylavamsikrishnasai@gmail.com](mailto:mylavamsikrishnasai@gmail.com)
+        - [Email](mailto:mylavamsikrishnasai@gmail.com)
         """
     )
 
@@ -45,10 +46,14 @@ def get_vector_store(chunks):
 
 @st.cache_resource
 def get_rag_chain():
+    # --- MODEL FOR DEPLOYMENT ---
+    # Using a very small model to fit into Streamlit's free hardware
     model_id = "distilgpt2"
     device = "cuda" if torch.cuda.is_available() else "cpu"
+    
+    # .get() is used for graceful error handling if the secret is missing
     hf_token = st.secrets.get("HUGGING_FACE_HUB_TOKEN", "")
-
+    
     tokenizer = AutoTokenizer.from_pretrained(model_id, token=hf_token)
     model = AutoModelForCausalLM.from_pretrained(
         model_id,
@@ -60,8 +65,8 @@ def get_rag_chain():
         "text-generation",
         model=model,
         tokenizer=tokenizer,
-        max_new_tokens=512, # Increased max tokens for more detailed answers
-        temperature=0.2,
+        max_new_tokens=256, # Reduced max tokens for the smaller model
+        temperature=0.7,
     )
     
     llm = HuggingFacePipeline(pipeline=pipe)
@@ -106,19 +111,12 @@ if uploaded_file is not None:
             with st.spinner("Thinking..."):
                 llm = get_rag_chain()
                 
-                # --- NEW: Professional Prompt Template ---
-                # This uses the official chat template for TinyLlama for better results
+                # A simpler prompt template suitable for the smaller distilgpt2 model
                 prompt_template = """
-                <|system|>
-                You are a helpful AI assistant. Use the provided context to answer the user's question.
-                If the answer is a list, format it with markdown bullets.
-                If you don't know the answer, simply state that you don't know.
-                Do not repeat the question or the context in your answer. Provide only the helpful answer itself.
-                Context: {context}</s>
-                <|user|>
-                Question: {question}</s>
-                <|assistant|>
-                Helpful Answer:"""
+                Use the following context to answer the question. If you don't know the answer, say you don't know.
+                Context: {context}
+                Question: {question}
+                Answer:"""
                 
                 PROMPT = PromptTemplate(
                     template=prompt_template, input_variables=["context", "question"]
@@ -129,29 +127,18 @@ if uploaded_file is not None:
                     chain_type="stuff",
                     retriever=st.session_state.vector_store.as_retriever(),
                     chain_type_kwargs={"prompt": PROMPT},
-                    return_source_documents=False # We don't need the source docs in the final output
                 )
                 
                 result = qa_chain.invoke({"query": prompt})
-                raw_response = result['result']
-                
-                # --- NEW: More Robust Cleaning Logic ---
-                # This function will clean the text more reliably
-                def clean_response(text):
-                    # First, remove the "Helpful Answer:" prefix if it exists
-                    if "Helpful Answer:" in text:
-                        text = text.split("Helpful Answer:", 1)[1]
-                    
-                    # Then, remove any repeated context or instructions
-                    context_marker = "Use the following pieces of context"
-                    if context_marker in text:
-                        text = text.split(context_marker, 1)[0]
-                        
-                    return text.strip()
+                response = result.get('result', "I couldn't find an answer.").strip()
 
-                cleaned_response = clean_response(raw_response)
+                # Clean the response to prevent the model from repeating the prompt
+                if "Question:" in response:
+                    response = response.split("Question:")[0].strip()
+                if "Answer:" in response:
+                    response = response.split("Answer:")[1].strip()
 
-                formatted_response = f"**Question:** {prompt}\n\n**Answer:**\n{cleaned_response}"
+                formatted_response = f"**Question:** {prompt}\n\n**Answer:**\n{response}"
                 
                 st.markdown(formatted_response)
         
