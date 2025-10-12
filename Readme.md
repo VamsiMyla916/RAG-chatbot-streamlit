@@ -2,10 +2,6 @@
 
 > An end-to-end RAG (Retrieval-Augmented Generation) chatbot that answers questions about user-uploaded PDF documents. This project runs a powerful, open-source Large Language Model entirely on your local machine, ensuring privacy and eliminating the need for API keys.
 
-## Demo
-
-![Final App Screenshot](https://raw.githubusercontent.com/VamsiMyla916/RAG-chatbot-streamlit/main/screenshot.png)
-
 ## Features
 
 - Interactive Chat Interface: Ask questions about your documents in a user-friendly web UI built with Streamlit.
