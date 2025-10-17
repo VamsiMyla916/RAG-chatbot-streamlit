@@ -22,7 +22,7 @@ This diagram illustrates the flow of data and user interaction within the applic
 
 ```mermaid
 graph TD
-    subgraph "1. Data Processing (One-Time per File)"
+    subgraph "1. Data Processing"
         A[User uploads PDF] --> B[Load & Chunk Text <br/> PyPDFLoader, RecursiveCharacterTextSplitter]
         B --> C[Vectorize Chunks <br/> all-MiniLM-L6-v2]
         C --> D[(Store in FAISS <br/> Vector Database)]
