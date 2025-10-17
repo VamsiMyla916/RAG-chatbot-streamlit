@@ -1,99 +1,88 @@
-# 📄 RAG Chatbot with Local LLM and Streamlit
+🤖 Multi-Tool AI Assistant
 
-> An end-to-end RAG (Retrieval-Augmented Generation) chatbot that answers questions about user-uploaded PDF documents. This project runs a powerful, open-source Large Language Model entirely on your local machine, ensuring privacy and eliminating the need for API keys.
+A versatile and interactive web application built with Streamlit and powered by the Google Gemini API. This project provides a suite of AI-powered tools to assist with various language tasks, including text summarization, translation, and professional email drafting.
 
-## Features
+Live Demo: [Link to your deployed Streamlit app] (<- Add your public URL here after deployment!)
 
-- Interactive Chat Interface: Ask questions about your documents in a user-friendly web UI built with Streamlit.
-- Local & Private: Powered by Google's `gemma-2b-it`, the entire AI pipeline runs locally. Your documents and queries never leave your machine.
-- PDF Document Support: Upload any PDF file and the application will automatically process and "learn" its content.
-- RAG Architecture: Utilizes the advanced RAG pattern to provide context-aware, accurate answers based on the document's content.
+Demo
 
----
+(<- Add a GIF or screenshot of your working application here!)
 
-## Tech Stack
+✨ Features
 
-- Language: Python
-- Core Frameworks: LangChain, Streamlit, Hugging Face Transformers
-- Large Language Model (LLM): `google/gemma-2b-it`
-- Embedding Model: `sentence-transformers/all-MiniLM-L6-v2`
-- Vector Database: FAISS (Facebook AI Similarity Search)
-- Core Libraries: PyTorch, PyPDF, NumPy
+📝 Text Summarizer: Paste in long articles or documents and receive a concise, easy-to-read summary.
 
----
+🌐 Language Translator: Translate text into multiple languages, including Spanish, French, German, Japanese, and more.
 
-## Setup and Installation
+✉️ Professional Email Writer: Draft well-structured, professional emails by simply providing a recipient and a few key bullet points.
 
-Follow these steps to set up the project locally.
+Interactive UI: A clean and user-friendly interface built with Streamlit, featuring a sidebar for easy tool navigation.
+
+Secure API Key Handling: Utilizes Streamlit's secrets management to securely handle the Google Gemini API key.
+
+🛠️ Tech Stack
+
+Frontend: Streamlit
+
+AI Model: Google Gemini Pro via the Google Gemini API
+
+Core Libraries: google-generativeai
+
+Language: Python
+
+🚀 Setup and Installation
+
+Follow these steps to run the project locally on your machine.
 
 1. Clone the Repository
 
-```bash
-git clone [https://github.com/YourUsername/YourRepoName.git](https://github.com/YourUsername/YourRepoName.git)
-cd YourRepoName
-```
+git clone [https://github.com/VamsiMyla916/Multi-Tool-AI-Assistant.git](https://github.com/VamsiMyla916/Multi-Tool-AI-Assistant.git)
+cd Multi-Tool-AI-Assistant
 
-````
+(Note: You may want to create a new repository for this project named Multi-Tool-AI-Assistant)
 
-_(Action Required:Replace `YourUsername` and `YourRepoName` with your actual GitHub details.)_
+2. Create and Activate a Virtual Environment
 
-1. Create and Activate a Virtual Environment
+# Create the environment
 
-```bash
-# Create the virtual environment
 python -m venv venv
 
 # Activate on Windows
+
 .\venv\Scripts\activate
 
 # Activate on Mac/Linux
-# source venv/bin/activate
-```
 
-1. Install Dependencies
+source venv/bin/activate
 
-- All required packages are listed in the `requirements.txt` file.
+3. Install Dependencies
 
-<!-- end list -->
+All required packages are listed in the requirements.txt file.
 
-```bash
 pip install -r requirements.txt
-```
 
-4. Log in to Hugging Face
+4. Set Up Your API Key
 
-- The Gemma model requires you to be authenticated with Hugging Face. First, accept the license terms on the [model page](https://huggingface.co/google/gemma-2b-it). Then, log in via the terminal.
+You will need a free Google Gemini API key. You can get one from the Google AI Studio.
 
-<!-- end list -->
+Create a folder named .streamlit in your project's main directory.
 
-```bash
-huggingface-cli login
-# or the newer command:
-# hf auth login
-```
+Inside the .streamlit folder, create a new file named secrets.toml.
 
-- Paste your Hugging Face access token when prompted.
+Add your API key to the secrets.toml file in the following format:
 
----
+GOOGLE_API_KEY = "Your-Actual-API-Key-Goes-Here"
 
-\#\# Usage
+🏃‍♀️ Usage
 
-1. Run the Streamlit App
+Ensure your virtual environment is active.
 
-- With your virtual environment active, run the following command:
+Run the Streamlit application from your terminal:
 
-<!-- end list -->
+streamlit run app.py
 
-```bash
-python -m streamlit run app.py
-```
+Your web browser will open with the application running. Use the sidebar to select a tool and start using the assistant.
 
-2. Use the Application
+📄 License
 
-- Your web browser will open with the application running.
-- Use the sidebar to upload a PDF file.
-- Wait for the application to process the document and create the knowledge base.
-- Ask questions about your document in the chat input box at the bottom.
-
----
-````
+This project is licensed under the MIT License.
