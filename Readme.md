@@ -22,28 +22,29 @@ This diagram illustrates the flow of data and user interaction within the applic
 
 ```mermaid
 graph TD
-    subgraph "User Interface (Streamlit)"
-        A[User selects a tool <br/> e.g., Summarizer] --> B{User enters text};
-        B --> C[User clicks "Submit"];
+    subgraph "1. Data Processing (One-Time per File)"
+        A[User uploads PDF] --> B[Load & Chunk Text <br/> PyPDFLoader, RecursiveCharacterTextSplitter]
+        B --> C[Vectorize Chunks <br/> all-MiniLM-L6-v2]
+        C --> D[(Store in FAISS <br/> Vector Database)]
     end
 
-    subgraph "Backend Logic"
-        C --> D[Construct a specific prompt <br/> for the chosen tool];
-        D --> E[Call Google Gemini API];
+    subgraph "2. Question Answering (Per Query)"
+        E{User asks a question} --> F[Vectorize Question]
+        F --> G{Similarity Search <br/> in FAISS}
+        D --> G
+        G --> H[Retrieve Relevant <br/> Context Chunks]
+        H --> I{Construct Prompt <br/> Context + Question}
+        E --> I
+        I --> J[Generate Answer <br/> TinyLlama LLM]
     end
 
-    subgraph "Google Cloud"
-        E --> F(Gemini Pro Model);
-        F --> G[Generate Response];
-    end
-
-    subgraph "Response Display"
-        G --> H[Return generated text to the app];
-        H --> I[Display the formatted <br/> result to the user];
+    subgraph "3. Display"
+        J --> K[Clean & Format <br/> Response]
+        K --> L[Display Answer <br/> in Streamlit UI]
     end
 
     style A fill:#B5EAD7,stroke:#333,stroke-width:2px
-    style I fill:#FFB7B2,stroke:#333,stroke-width:2px
+    style L fill:#FFB7B2,stroke:#333,stroke-width:2px
 ```
 
 🛠️ Tech Stack
