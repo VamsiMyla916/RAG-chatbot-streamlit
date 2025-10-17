@@ -2,11 +2,7 @@
 
 A versatile and interactive web application built with Streamlit and powered by the Google Gemini API. This project provides a suite of AI-powered tools to assist with various language tasks, including text summarization, translation, and professional email drafting.
 
-Live Demo: [Link to your deployed Streamlit app] (<- Add your public URL here after deployment!)
-
-Demo
-
-(<- Add a GIF or screenshot of your working application here!)
+Live Demo: [Link to your deployed Streamlit app] (https://huggingface.co/spaces/vamsimyla/ragchatbotvm)
 
 ✨ Features
 
@@ -19,6 +15,36 @@ Demo
 Interactive UI: A clean and user-friendly interface built with Streamlit, featuring a sidebar for easy tool navigation.
 
 Secure API Key Handling: Utilizes Streamlit's secrets management to securely handle the Google Gemini API key.
+
+📈 Workflow
+
+This diagram illustrates the flow of data and user interaction within the application.
+
+```mermaid
+graph TD
+    subgraph "User Interface (Streamlit)"
+        A[User selects a tool <br/> e.g., Summarizer] --> B{User enters text};
+        B --> C[User clicks "Submit"];
+    end
+
+    subgraph "Backend Logic"
+        C --> D[Construct a specific prompt <br/> for the chosen tool];
+        D --> E[Call Google Gemini API];
+    end
+
+    subgraph "Google Cloud"
+        E --> F(Gemini Pro Model);
+        F --> G[Generate Response];
+    end
+
+    subgraph "Response Display"
+        G --> H[Return generated text to the app];
+        H --> I[Display the formatted <br/> result to the user];
+    end
+
+    style A fill:#B5EAD7,stroke:#333,stroke-width:2px
+    style I fill:#FFB7B2,stroke:#333,stroke-width:2px
+```
 
 🛠️ Tech Stack
 
