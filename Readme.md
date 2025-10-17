@@ -43,8 +43,6 @@ graph TD
         K --> L[Display Answer <br/> in Streamlit UI]
     end
 
-    style A fill:#B5EAD7,stroke:#333,stroke-width:2px
-    style L fill:#FFB7B2,stroke:#333,stroke-width:2px
 ```
 
 🛠️ Tech Stack
