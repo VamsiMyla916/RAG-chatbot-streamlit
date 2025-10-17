@@ -8,10 +8,6 @@ Live Demo: [Link to your deployed Streamlit app] (https://huggingface.co/spaces/
 
 📝 Text Summarizer: Paste in long articles or documents and receive a concise, easy-to-read summary.
 
-🌐 Language Translator: Translate text into multiple languages, including Spanish, French, German, Japanese, and more.
-
-✉️ Professional Email Writer: Draft well-structured, professional emails by simply providing a recipient and a few key bullet points.
-
 Interactive UI: A clean and user-friendly interface built with Streamlit, featuring a sidebar for easy tool navigation.
 
 Secure API Key Handling: Utilizes Streamlit's secrets management to securely handle the Google Gemini API key.
